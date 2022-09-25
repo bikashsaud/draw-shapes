@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <!-- CSS only -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-iYQeCzEYFbKjA/T2uDLTpkwGzCiq6soy8tYaI1GyVh/UjpbCx/TYkiZhlZB6+fzT" crossorigin="anonymous">
+
+    <style>
+        #screenshot {
+            position: absolute;
+            z-index: 1;
+
+        }
+
+        #draw {
+            position: absolute;
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        #draw #boxes {
+            fill: none;
+            stroke: rgb(0, 247, 255);
+            stroke-width: 3;
+            fill-opacity: 0.5;
+            stroke-opacity: 0.9;
+        }
+
+        #draw #marquee {
+            fill: none;
+            stroke: blue;
+            stroke-width: 4;
+            stroke-dasharray: 0, 0;
+            stroke-opacity: 0.8;
+            fill-opacity: 0.2;
+        }
+
+        #draw #marquee.hide {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="row">
+        <div class="col d-flex justify-content-center mt-4 pt-4">
+            <img width="1080" height="608" src='/home/dell/other/test/20160926_151120.jpg' id="screenshot" draggable="false">
+            <svg width="1080" height="608" viewBox="0 0 1080 608" id="draw" xmlns="http://www.w3.org/2000/svg">
+                <rect id="marquee" x="450" y="420" width="150" height="150" />
+                <g id="boxes"></g>
+            </svg>
+        </div>
+    </div>
+</body>
+<script src="https://code.jquery.com/jquery-3.6.1.min.js" integrity="sha256-o88AwQnZB+VDvE9tvIXrMQaPlFFSUTR+nldQm1LuPXQ=" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-u1OknCvxWvY5kfmNBILK2hRnQC3Pr17a+RTT6rIHI7NnikvbZlHgTPOOmMi466C8"
+    crossorigin="anonymous"></script>
+
+<script>
+    // script for draw rectangle......
+    const $ = document.querySelector.bind(document);
+    console.log(`draw rectangle:`, $)
+    const rectangles = [];
+
+    // DOM elements
+    const $screenshot = $('#screenshot');
+    const $draw = $('#draw');
+    const $marquee = $('#marquee');
+    const $boxes = $('#boxes');
+
+    // Temp variables
+    let startX = 0;
+    let startY = 0;
+
+    const marqueeRect = {
+        x: 0,
+        y: 0,
+        width: 0,
+        height: 0,
+    };
+    var rect_coordinates = [];
+    var line_co_ordinates = [];
+
+
+    $marquee.classList.add('hide');
+    $screenshot.addEventListener('pointerdown', startDrag);
+    var rect = $screenshot.getBoundingClientRect()
+
+    // start create rectangle.
+    function startDrag(ev) {
+        // if 
+        if(! $boxes.hasChildNodes()){
+            window.addEventListener('pointerup', stopDrag);
+            $screenshot.addEventListener('pointermove', moveDrag);
+            $marquee.classList.remove('hide');
+            startX = ev.clientX - rect.left;
+            startY = ev.clientY - rect.top;
+    
+            console.log('Start dragging', startX, startY, rect);
+            drawRect($marquee, startX, startY, 0, 0);
+        }
+    }
+
+    function stopDrag(ev) {
+        $marquee.classList.add('hide');
+        window.removeEventListener('pointerup', stopDrag);
+        $screenshot.removeEventListener('pointermove', moveDrag);
+        if (ev.target === $screenshot && marqueeRect.width && marqueeRect.height) {
+            rectangles.push(Object.assign({}, marqueeRect));
+            redraw();
+        }
+    }
+
+    function moveDrag(ev) {
+        
+        let x = ev.clientX - rect.left;
+        let y = ev.clientY - rect.top;
+        rect_coordinates.length = 0
+        if (startX>x){
+            rect_coordinates.push
+        }
+        rect_coordinates = [startX,startY,x,y];
+        console.log(rect_coordinates, 3333333333333333);
+        
+        let width = startX - x;
+        let height = startY - y;
+        if (width < 0) {
+            width *= -1;
+            x -= width;
+        }
+        if (height < 0) {
+            height *= -1;
+            y -= height;
+        }
+        
+        Object.assign(marqueeRect, { x, y, width, height });
+        drawRect($marquee, marqueeRect);
+    }
+
+    function redraw() {
+        boxes.innerHTML = '';
+        rectangles.forEach((data) => {
+            boxes.appendChild(drawRect(
+                document.createElementNS("http://www.w3.org/2000/svg", 'rect'), data
+            ));
+        });
+    }
+
+    function drawRect(rect, data) {
+        const { x, y, width, height } = data;
+        rect.setAttributeNS(null, 'width', width);
+        rect.setAttributeNS(null, 'height', height);
+        rect.setAttributeNS(null, 'x', x);
+        rect.setAttributeNS(null, 'y', y);
+        return rect;
+    }
+</script>
+
+</html>
